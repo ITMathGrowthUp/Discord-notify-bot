@@ -1,73 +1,33 @@
-#name: Deploy
-#
-#on:
-#  push:
-#    branches:
-#      - main
-#
-#  workflow_dispatch: # Allows you to run the workflow manually
-#
-#jobs:
-#  build:
-#    name: Build
-#    runs-on: ubuntu-latest
-#
-#    steps:
-#      - name: Checkout repo
-#        uses: actions/checkout@v4
-#
-#      - name: Setup Node
-#        uses: actions/setup-node@v4
-#
-#      - uses: pnpm/action-setup@v4
-#        with:
-#          version: 10
-#
-#      - name: Install dependencies
-#        run: pnpm install
-#
-#      - name: Build project
-#        run: pnpm run build
-#
-#      - name: Upload production-ready build files
-#        uses: actions/upload-artifact@v4
-#        with:
-#          name: production-files
-#          path: ./dist
-#
-#  deploy:
-#    name: Deploy
-#    needs: build
-#    runs-on: ubuntu-latest
-#    if: github.ref == 'refs/heads/main'
-#
-#    steps:
-#      - name: Download artifact
-#        uses: actions/download-artifact@v4
-#        with:
-#          name: production-files
-#          path: ./dist
-#
-#      - name: Deploy to GitHub Pages
-#        uses: peaceiris/actions-gh-pages@v4
-#        with:
-#          github_token: ${{ secrets.GITHUB_TOKEN }}
-#          publish_dir: ./dist
-#
-#      - name: Notify Discord (Success)
-#        if: success()
-#        env:
-#          BOT_SERVER_URL: "https://my-url/send"
-#        run: |
-#          curl -X POST "$BOT_SERVER_URL" \
-#               -H "Content-Type: application/json" \
-#               -d '{"status": "success", "message": "✅ Deployment successful!"}'
-#
-#      - name: Notify Discord (Failure)
-#        if: failure()
-#        env:
-#          BOT_SERVER_URL: "https://my-url/send"
-#        run: |
-#          curl -X POST "$BOT_SERVER_URL" \
-#               -H "Content-Type: application/json" \
-#               -d '{"status": "fail", "message": "❌ Deployment failed!"}'
+name: Notify Discord
+
+on:
+  workflow_run:
+    workflows: ["Deploy"]
+    types:
+      - completed
+
+  workflow_dispatch:
+    inputs:
+      discord_api_url:
+        description: "API URL to notify Discord"
+        required: false
+        default: "https://my-url"
+
+jobs:
+  notify:
+    name: Notify Discord
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Send notification to Discorda
+        run: |
+          curl -X POST ${{ inputs.discord_api_url }}/send \
+          -H "Content-Type: application/json" \
+          -d '{
+            "status": "${{ job.status }}",
+            "message": "Build ${{ job.status }} for commit ${{ github.sha }}",
+          }'
+        env:
+          DISCORD_BOT_TOKEN: ${{ secrets.DISCORD_BOT_TOKEN }}
+          DISCORD_CHANNEL_ID: "1352904828556283955"  # Replace with actual channel ID
+          DISCORD_THREAD_ID: "1353306988607438931"  # Replace with actual thread ID

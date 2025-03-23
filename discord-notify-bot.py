@@ -1,14 +1,14 @@
 import discord
 import uvicorn
 import asyncio
+import os
 from discord.ext import commands
 from fastapi import FastAPI, Request
 
-# TODO: Get secrets from GitHub repository, CHANNEL_ID and THREAD_ID from Github Action inputs
 # Temporary store the secrets here
-TOKEN = "MTM1MzMxODI4NDEwNzMyMTM4NA.GK83U7.ykLqMbGFB-fKyuxOeltCPITZL9JUVfWlrZu9wQ"
-CHANNEL_ID = 1352904828556283955
-THREAD_ID = 1353306988607438931
+TOKEN = os.getenv("DISCORD_BOT_TOKEN")  # Securely fetch from environment variables
+CHANNEL_ID = int(os.getenv("DISCORD_CHANNEL_ID", "0"))  # Convert to int
+THREAD_ID = int(os.getenv("DISCORD_THREAD_ID", "0"))  # Convert to int
 
 intents = discord.Intents.default()
 bot = commands.Bot(command_prefix="!", intents=intents)
