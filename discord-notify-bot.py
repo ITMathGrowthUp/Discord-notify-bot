@@ -53,13 +53,16 @@ async def receive_github_notification(request: Request):
     return {"status": "ok", "message": "Notification sent to Discord"}
 
 
-# Run both FastAPI and the bot in an async loop
+# Function to run both bot and FastAPI together
 async def main():
-    bot_task = asyncio.create_task(bot.start(TOKEN))
-    server_task = asyncio.create_task(uvicorn.run(app, host="0.0.0.0", port=8000))
+    loop = asyncio.get_running_loop()
 
-    await asyncio.gather(bot_task, server_task)
+    # Run the bot and FastAPI server as tasks
+    loop.create_task(bot.start(TOKEN))
+    config = uvicorn.Config(app, host="0.0.0.0", port=8000)
+    server = uvicorn.Server(config)
+    await server.serve()
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    asyncio.run(main())  # This will now work correctly!
