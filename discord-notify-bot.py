@@ -23,7 +23,7 @@ async def on_ready():
     print(f"✅ Logged in as {bot.user}")
 
 
-async def send_discord_notification(status: str, message: str):
+async def send_discord_notification(status: str, message: str, repository: str, triggered_by: str, commit_hash: str, change_log: str, deploy_time: str):
     channel = bot.get_channel(CHANNEL_ID)
     if channel is None:
         print("❌ Error: Channel not found!")
@@ -32,10 +32,19 @@ async def send_discord_notification(status: str, message: str):
     thread = channel.get_thread(THREAD_ID)
     if thread:
         embed = discord.Embed(
-            title="🚀 Deployment Status",
+            title="🚀 Deployment Notification",
             description=message,
             color=discord.Color.green() if status == "success" else discord.Color.red()
         )
+
+        embed.add_field(name="📌 Repository", value=f"[View on GitHub]({repository})", inline=False)
+        embed.add_field(name="👤 Triggered By", value=triggered_by, inline=True)
+        embed.add_field(name="🔗 Commit Hash", value=f"`{commit_hash}`", inline=True)
+        embed.add_field(name="📝 Change Log", value=change_log, inline=False)
+        embed.add_field(name="⏰ Deployment Time", value=deploy_time, inline=False)
+
+        embed.set_footer(text="Automated Deployment Notification")
+
         await thread.send(embed=embed)
     else:
         print("❌ Error: Thread not found!")
@@ -46,10 +55,14 @@ async def receive_github_notification(request: Request):
     data = await request.json()
     status = data.get("status", "unknown")
     message = data.get("message", "No message provided.")
-    message += f"\n\nTriggered by: {data.get('triggered_by', 'unknown')}"
+    repository = data.get("repository", "N/A")
+    triggered_by = data.get("triggered_by", "unknown")
+    commit_hash = data.get("commit_hash", "N/A")
+    change_log = data.get("change_log", "N/A")
+    deploy_time = data.get("time", "N/A")
 
     # Schedule the task inside the bot event loop
-    asyncio.create_task(send_discord_notification(status, message))
+    asyncio.create_task(send_discord_notification(status, message, repository, triggered_by, commit_hash, change_log, deploy_time))
 
     return {"status": "ok", "message": "Notification sent to Discord"}
 
@@ -66,4 +79,4 @@ async def main():
 
 
 if __name__ == "__main__":
-    asyncio.run(main())  # This will now work correctly!
+    asyncio.run(main())
