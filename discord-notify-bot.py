@@ -23,7 +23,7 @@ async def on_ready():
     print(f"✅ Logged in as {bot.user}")
 
 
-async def send_discord_notification(status: str, message: str):
+async def send_discord_notification(status: str, message: str, triggerBy: str):
     channel = bot.get_channel(CHANNEL_ID)
     if channel is None:
         print("❌ Error: Channel not found!")
@@ -46,6 +46,7 @@ async def receive_github_notification(request: Request):
     data = await request.json()
     status = data.get("status", "unknown")
     message = data.get("message", "No message provided.")
+    message += f"\n\nTriggered by: {data.get('triggerBy', 'unknown')}"
 
     # Schedule the task inside the bot event loop
     asyncio.create_task(send_discord_notification(status, message))
