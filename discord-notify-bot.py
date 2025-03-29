@@ -23,7 +23,7 @@ async def on_ready():
     print(f"✅ Logged in as {bot.user}")
 
 
-async def send_discord_notification(status: str, message: str, triggerBy: str):
+async def send_discord_notification(status: str, message: str):
     channel = bot.get_channel(CHANNEL_ID)
     if channel is None:
         print("❌ Error: Channel not found!")
