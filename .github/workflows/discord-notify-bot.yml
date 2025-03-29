@@ -11,7 +11,7 @@ on:
       discord_api_url:
         description: "API URL to notify Discord"
         required: false
-        default: "https://my-url"
+        default: "https://discord-notify-bot-jw61.onrender.com"
 
 jobs:
   notify:
@@ -29,5 +29,5 @@ jobs:
           }'
         env:
           DISCORD_BOT_TOKEN: ${{ secrets.DISCORD_BOT_TOKEN }}
-          DISCORD_CHANNEL_ID: "1352904828556283955"  # Replace with actual channel ID
-          DISCORD_THREAD_ID: "1353306988607438931"  # Replace with actual thread ID
+          DISCORD_CHANNEL_ID: "1352904828556283955"
+          DISCORD_THREAD_ID: "1353306988607438931"
