@@ -46,8 +46,7 @@ async def receive_github_notification(request: Request):
     data = await request.json()
     status = data.get("status", "unknown")
     message = data.get("message", "No message provided.")
-    message += f"\n\nTriggered by: {data.get('trigger_by', 'unknown')}"
-    print(data.get('trigger_by'))
+    message += f"\n\nTriggered by: {data.get('triggered_b', 'unknown')}"
 
     # Schedule the task inside the bot event loop
     asyncio.create_task(send_discord_notification(status, message))
